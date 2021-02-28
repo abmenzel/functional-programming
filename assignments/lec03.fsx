@@ -4,6 +4,7 @@ let rec downTo n =
     elif n > 1 then n::downTo(n-1)
     else failwith "number must be greater than 1"
 
+
 let rec downTo2 n =
     match n with
     | 1 -> [n]

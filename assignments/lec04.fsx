@@ -13,7 +13,9 @@ let rec explode2 (s:string) =
 let implode list =
     List.foldBack (fun (x:char) (y:string) -> string(x) + y) list ""
 
-let implode2 list = failwith "not implemented"
+let rec implode2 list =
+    match list with
+    | 
 
 let implodeRev list =
     List.fold (fun (x:string) (y:char) -> string(y) + x) "" list
@@ -34,18 +36,44 @@ let toUpper2 (s:string) =
 toUpper2 ("Hej");;
 
 // Exercise 2.10 - palindrome - treating empty strings as palindromes too.
-let rec palindrome (s:string) = failwith "not implemented"
+let rec palindrome (s:string) =
+    match s with
+    | s when s.Length < 2 -> true
+    | s when s.Chars(0) = s.Chars(s.Length - 1) -> palindrome (s.Remove(s.Length - 1).Remove(0,1))
+    | _ -> false
+
 // Exercise 2.11 - ack
-let rec ack t = failwith "not implemented"
-    // ack(3, 11) = 1638ss1
+let rec ack t =
+    match t with
+    | 0,n -> n + 1
+    | m,n when m > 0 && n = 0 -> ack(m - 1, 1)
+    | m,n when m > 0 && n > 0 -> ack(m - 1, ack(m,n-1))
+    | _ -> failwith "only use non-negative numbers"
+
+ack(3,11);;
 
 // Exercise 2.12 - time
-let time f = failwith "not implemented"
+let time f =
+    let start = System.DateTime.Now in
+    let res = f () in
+    let finish = System.DateTime.Now in 
+    (res, finish - start);
     
-let timeArg1 f a = failwith "not implemented"
+let timeArg1 f a =
+    time (fun () -> f a)
+
+timeArg1 palindrome "test"
 
 // Exercise 2.13 - HR 5.4 - downTo2 f n e
-let rec downto1 f (n, e) = failwith "not implemented"
+let rec downto1 f (n, e) =
+    match (n,e) with
+    | (n,e) when n <= 0 -> e
+    | (n,e) when n > 0 -> f (n, downto1 f (n-1, e))
+    | _ -> failwith("does not work")
+
 // factorial function using downto1 for recursion.
-let fact n = failwith "not implemented"
-let buildList g n = failwith "not implemented"
+let fact n =
+    downto1 (fun (x,y) -> x * y) (n-1, n)
+
+let buildList g n =
+    g n::downto1 (fun (x,y) -> g x::y) (n-1,[])
