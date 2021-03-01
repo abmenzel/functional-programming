@@ -15,7 +15,8 @@ let implode list =
 
 let rec implode2 list =
     match list with
-    | 
+    | x::list -> string(x) + implode2 list 
+    | _ -> ""
 
 let implodeRev list =
     List.fold (fun (x:string) (y:char) -> string(y) + x) "" list
@@ -27,13 +28,9 @@ let toUpper (s:string) = implode (List.map System.Char.ToUpper (explode(s)))
 let toUpper1 (s:string) =
     (explode >> List.map System.Char.ToUpper >> implode) s
 
-toUpper1 ("Hej");;
-
 // let toUpper2 (s:string) = implode (explode s |> List.map(fun x -> (Char.ToUpper(x))));;
 let toUpper2 (s:string) =
     explode(s) |> (implode << List.map System.Char.ToUpper)
-
-toUpper2 ("Hej");;
 
 // Exercise 2.10 - palindrome - treating empty strings as palindromes too.
 let rec palindrome (s:string) =
@@ -50,19 +47,15 @@ let rec ack t =
     | m,n when m > 0 && n > 0 -> ack(m - 1, ack(m,n-1))
     | _ -> failwith "only use non-negative numbers"
 
-ack(3,11);;
-
 // Exercise 2.12 - time
 let time f =
     let start = System.DateTime.Now in
     let res = f () in
     let finish = System.DateTime.Now in 
     (res, finish - start);
-    
+
 let timeArg1 f a =
     time (fun () -> f a)
-
-timeArg1 palindrome "test"
 
 // Exercise 2.13 - HR 5.4 - downTo2 f n e
 let rec downto1 f (n, e) =
@@ -73,7 +66,13 @@ let rec downto1 f (n, e) =
 
 // factorial function using downto1 for recursion.
 let fact n =
-    downto1 (fun (x,y) -> x * y) (n-1, n)
+    match n with
+    | n when n > 0 -> downto1 (fun (x,y) -> x * y) (n-1, n)
+    | _ -> failwith("n must be a positive number")
 
 let buildList g n =
-    g n::downto1 (fun (x,y) -> g x::y) (n-1,[])
+    List.fold
+        (fun rs x -> x::rs) []
+        (g n::downto1 (fun (x,y) -> g x::y) (n-1,[]))
+
+buildList fact 5
