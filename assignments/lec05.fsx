@@ -23,8 +23,13 @@ let rec mapInOrder f tree =
 //mapInOrder (fun x -> x+1) intBinTree;;
 
 // 5.3
-let foldInOrder f x tree =
-    List.fold f x (inOrder tree)
+let rec foldInOrder f x tree =
+    match tree with
+    | Leaf -> x
+    | Node(treeL, node, treeR) ->
+        foldInOrder f x node
+        |> f treeL
+        |> fun x -> foldInOrder f x treeR
 
 let floatBinTree =
     Node(43.0,Node(25.0, Node(56.0,Leaf, Leaf), Leaf),
@@ -40,6 +45,7 @@ type aExp =                     (* Arithmetical expressions *)
     | Add of aExp * aExp        (* addition *)
     | Mul of aExp * aExp        (* multiplication *)
     | Sub of aExp * aExp        (* subtraction *)
+    | Inc of string
 
 type bExp =                     (* Boolean expressions *)
     | TT                        (* true *)
@@ -64,7 +70,8 @@ let rec A a s =
     | V x -> Map.find x s
     | Add(a1, a2) -> A a1 s + A a2 s
     | Mul(a1, a2) -> A a1 s * A a2 s
-    | Sub(a1, a2) -> A a1 s - A a2 s;;
+    | Sub(a1, a2) -> A a1 s - A a2 s
+    | Inc x -> Map.find x s + 1;;
 
 let rec B b s =
     match b with
@@ -125,3 +132,4 @@ I stmt5 state5 // testResult is positive
 
 // Exercise 5.6
 // I would update x with (V x + 1) s, such that it looks for the stored variable adds 1 to it, and stores that as the new state
+// Implementation is in A a s

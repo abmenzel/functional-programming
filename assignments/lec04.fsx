@@ -61,18 +61,21 @@ let timeArg1 f a =
 let rec downto1 f (n, e) =
     match (n,e) with
     | (n,e) when n <= 0 -> e
-    | (n,e) when n > 0 -> f (n, downto1 f (n-1, e))
+    | (n,e) when n > 0 -> downto1 f (n-1, f (n, e))
     | _ -> failwith("does not work")
 
-// factorial function using downto1 for recursion.
-let fact n =
-    match n with
-    | n when n > 0 -> downto1 (fun (x,y) -> x * y) (n-1, n)
-    | _ -> failwith("n must be a positive number")
+// fact 3
+// downto1 fun (3,1)
+// downto1 fun (2, fun (3,1))
+// downto1 fun (2, 3)
+// downto1 fun (1, fun (2,3))
+// downto1 fun (1, 6)
+// downto1 fun (0, fun (1,6))
+// downto1 fun (0, 6) -> 6
 
-let buildList g n =
-    List.fold
-        (fun rs x -> x::rs) []
-        (g n::downto1 (fun (x,y) -> g x::y) (n-1,[]))
+// factorial function using downto1 for recursion.
+let fact n = downto1 (fun (x,y) -> x * y) (n, 1)
+
+let buildList g n = downto1 (fun (x,y) -> g x::y) (n,[])
 
 buildList fact 5
