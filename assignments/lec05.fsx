@@ -18,9 +18,14 @@ let rec inOrder tree =
 let rec mapInOrder f tree =
     match tree with
     | Leaf -> Leaf
-    | Node (n, treeL, treeR) -> Node(f n, mapInOrder f treeL, mapInOrder f treeR)
+    | Node (n, treeL, treeR) ->
+        let treeL2 = mapInOrder f treeL
+        Node(f n, treeL2, mapInOrder f treeR)
 
-//mapInOrder (fun x -> x+1) intBinTree;;
+// mapInOrder and mapPostOrder will give different ordered results, as they map over the values in a different order.
+// E.g. mapInOrder (fun x -> printfn "%i" x; x+1) intBinTree;; results in:
+// mapInOrder: 57, 26, 44, 563, 79
+// mapPostOrder: 57, 26, 79, 563, 44
 
 // 5.3
 let rec foldInOrder f x tree =
