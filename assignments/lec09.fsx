@@ -371,8 +371,16 @@ let expr12 = Prim("+", CstI(7), Prim("choose", Prim1("ABS", CstI(-9)), CstI(10))
 Make both a standard explicit version of (A) and a monadic version.
 You need to create a new monad OptionTraceABuilder, among other things.
 *)
+type OptionTraceABuilder() =
+    member this.Bind(x, f) =
+        match x with
+        | None -> None
+        | Some v -> f v
+    member this.Return x = ([], x)
+    member this.ReturnFrom x = x
 
-let rec explOptTraceEvalA e : int trace option = failwith "3.1 not implemented"
+let rec explOptTraceEvalA e : int trace option =
+    
 
 let rec optTraceEvalA e = failwith "3.1 not implemented"
 
