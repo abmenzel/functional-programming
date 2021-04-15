@@ -62,10 +62,11 @@ let upd f k v m =
 // Declare an F# function map f m of type ...
 let map f m =
     match m with
-    | MyMap m -> MyMap (List.map (fun (k,v) -> (k, f v)) m)
+    | MyMap m -> MyMap (List.map (fun (k,v) -> (k,(f k v))) m)
 
 //let test = map (fun (x,v) -> (x,v+2)) dice1
         
 let fold f s m =
     match m with
-    | MyMap m -> List.fold (fun k -> f k) s m
+    | MyMap m -> List.fold (fun state (k,v) -> f state k v) s m
+
