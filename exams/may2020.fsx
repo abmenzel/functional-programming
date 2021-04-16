@@ -70,3 +70,54 @@ let fold f s m =
     match m with
     | MyMap m -> List.fold (fun state (k,v) -> f state k v) s m
 
+// Question 2.1
+
+// Declare  an F# function even n of type ...
+let even n =
+    match n with
+    | n when n % 2 = 0 -> true
+    | _ -> false
+
+// Declare an F# function collatz n of type ...
+let collatz n =
+    match n with
+    | n when even n -> n / 2
+    | _ -> 3 * n + 1
+
+// Declare an F# function collatz' n of type ...
+let collatz' n =
+    match n with
+    | n when n <= 0 -> failwith("collatz': n is zero or less")
+    | _ -> collatz n
+
+// Question 2.2
+
+// Declare an F# function applyN of type ...
+let applyN f n N =
+    let start = N
+    let rec buildListN n N l =
+        match N with
+        | N when N = start -> (n)::(buildListN (f n) (N-1) l)
+        | N when N > 1 -> (f n)::(buildListN (f n) (N-1) l)
+        | _ -> [f n]
+    buildListN n N []
+
+// Declare an F# function applyUntilOne f n of type ...
+let applyUntilOne f n =
+    let rec findI n i =
+        match n with
+        | n when n = 1 -> i
+        | _ -> findI (f n) (i+1)
+    findI n 0
+
+// Question 2.3
+
+let rec mySeq f x =
+    seq { yield x
+          yield! mySeq f (f x)}
+
+mySeq collatz 42;;
+// Declare g x
+// !!!!!!
+
+// Question 3
