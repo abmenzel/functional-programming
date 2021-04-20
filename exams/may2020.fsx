@@ -64,7 +64,7 @@ let map f m =
     match m with
     | MyMap m -> MyMap (List.map (fun (k,v) -> (k,(f k v))) m)
 
-//let test = map (fun (x,v) -> (x,v+2)) dice1
+//let test = map (fun k v -> v + 2) dice1
         
 let fold f s m =
     match m with
@@ -116,8 +116,93 @@ let rec mySeq f x =
     seq { yield x
           yield! mySeq f (f x)}
 
-mySeq collatz 42;;
+// x = 4
+// f x = collatz 4 = 2
+// myseq collatz 2
+// x = 2
+// f x = collatz 2 = 1
+// myseq collatz 1
+// x = 1
+// f x = collatz 1 = 
+
+// An example sequence with x = 42 is: seq[4; 2; 1; 4; 2; 1; 4; 2; 1; ...]
+
 // Declare g x
-// !!!!!!
+let g x = x*2
 
 // Question 3
+type name = string
+type quantity = float
+type date = int * int * int
+type price = float
+type transType = Buy | Sell
+type transData = date * quantity * price * transType
+type trans = name * transData
+
+let ts : trans list =
+    [("ISS", ((24,02,2014),100.0,218.99,Buy)); ("Lego",((16,03,2015),250.0,206.72,Buy));
+    ("ISS", ((23,02,2016),825.0,280.23,Buy)); ("Lego",((08,03,2016),370.0,280.23,Buy));
+    ("ISS", ((24,02,2017),906.0,379.46,Buy)); ("Lego",((09,11,2017), 80.0,360.81,Sell));
+    ("ISS", ((09,11,2017),146.0,360.81,Sell)); ("Lego",((14,11,2017),140.0,376.55,Sell));
+    ("Lego",((20,02,2018),800.0,402.99,Buy)); ("Lego",((02,05,2018),222.0,451.80,Sell));
+    ("ISS", ((22,05,2018),400.0,493.60,Buy)); ("ISS", ((19,09,2018),550.0,564.00,Buy));
+    ("Lego",((27,03,2019),325.0,625.00,Sell)); ("ISS", ((25,11,2019),200.0,680.50,Sell));
+    ("Lego",((18,02,2020),300.0,720.00,Sell))]
+
+let addTransToMap ((n, td):trans) m =
+    match Map.tryFind n m with
+    | None -> m.Add (n, [td])
+    | Some transList -> m.Add (n, td::transList)
+
+let shares = List.foldBack addTransToMap ts Map.empty
+
+let accTrans (tq:float, avg:float) ((d,q,p,tType):transData) =
+    match tType with
+    | Buy ->
+        ((tq + q), ((avg * tq) + (q * p)) / (tq + q))
+    | Sell ->
+        (tq - q, avg)
+
+let quantityAndAvgPrice ts = List.fold accTrans (0.0,0.0) ts
+
+quantityAndAvgPrice [((24,02,2014),100.0,218.99,Buy);((23,02,2016),825.0,280.23,Buy)]
+
+let res = Map.map (fun name td -> (quantityAndAvgPrice td)) shares
+
+// Question 4
+
+// Question 4.1
+
+// Consider the F# declaration
+let rec dup = function
+      [] -> []
+    | x::xs -> x::x::dup xs
+// Describe the list generated
+// The dup function duplicates all elements of a list, that is given a list [1,2,3] the dup of that list would be [1,1,2,2,3,3]
+
+// Tail recursive version
+let rec dupA l acc =
+    match l with
+    | [] -> acc
+    | x::xs -> dupA xs (acc @ [x] @ [x])
+
+dupA [1;2;3] []
+
+// Question 4.2
+
+// Declare an F# function replicate2 i of type ...
+let replicate2 i =
+    seq (dupA [i] [])
+
+let dupSeq =
+    Seq.initInfinite (fun index ->
+    let n = float index
+    int(floor (n/2.0)))
+
+// Question 4.3
+
+// Declare an F# function dupSeq2
+let dupSeq2 s =
+    seq {for i in s do yield i; yield i}
+
+
