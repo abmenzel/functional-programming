@@ -111,6 +111,20 @@ let merge_case2 = merge ([1;2;3], [1;5])
 let merge_case3 = merge ([1;2;3], [1;2;3])
 // Assert that the function correctly merges identical lists
 
+// Question 2.3
+
+let divideAndConquer split merge indivisible p =
+    let rec dc p =
+        if indivisible p
+        then p 
+        else match (split p) with (l1,l2) -> merge (dc l1, dc l2)
+    dc p
+
+divideAndConquer split merge indivisible [22;746;931;975;200]
+
+// Question 3
+let triNum =
+    Seq.initInfinite
 
 // Question 4
 exception FigError of string
