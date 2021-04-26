@@ -124,7 +124,33 @@ divideAndConquer split merge indivisible [22;746;931;975;200]
 
 // Question 3
 let triNum =
-    Seq.initInfinite
+    Seq.initInfinite (fun i -> i*(i+1)/2)
+
+let triNumC =
+    Seq.cache triNum
+
+let rec filterOddIndex s =
+    Seq.append (Seq.singleton (Seq.item 0 s)) (filterOddIndex (Seq.skip 2 s))
+
+let myFilterOddIndex s =
+    let rec inner seq acc =
+        match seq with
+        | seq -> inner (Seq.skip 2 seq) (Seq.append acc (Seq.item 0 seq))
+        | _ -> acc
+    inner s Seq.empty
+
+myFilterOddIndex triNum
+
+// Question 3.3
+let rec zipSeq s1 s2 =
+    seq {let e1 = Seq.item 0 s1
+         let e2 = Seq.item 0 s2
+         (e1,e2); yield! (zipSeq (Seq.skip 1 s1) (Seq.skip 1 s2)) }
+
+let test =
+    seq {1;2;3}
+
+printfn "%A" (zipSeq triNum triNum)
 
 // Question 4
 exception FigError of string
