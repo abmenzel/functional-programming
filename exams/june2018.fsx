@@ -147,10 +147,6 @@ let rec zipSeq s1 s2 =
          let e2 = Seq.item 0 s2
          (e1,e2); yield! (zipSeq (Seq.skip 1 s1) (Seq.skip 1 s2)) }
 
-let test =
-    seq {1;2;3}
-
-printfn "%A" (zipSeq triNum triNum)
 
 // Question 4
 exception FigError of string
