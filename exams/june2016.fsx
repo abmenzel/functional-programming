@@ -155,6 +155,19 @@ let C9 = ((9, 'C'), ArithOp (sum, Div, Ref (9, 'B')))
 
 let heights = Sheet [B4;B5;B6;B7;B9;C4;C5;C6;C7;C9]
 
+let header = [((1,'A'),SCst "#EYES");((1,'B'),SCst "1");((1,'C'),SCst "2");
+    ((1,'D'),SCst "3");((1,'E'),SCst "4");((1,'F'),SCst "5");
+    ((1,'G'),SCst "6");((1,'H'),SCst "Total")]
+let result = [((2,'A'),SCst "RESULT");((2,'B'),FCst 2.0);((2,'C'),FCst 1.0);
+    ((2,'D'),FCst 5.0);((2,'E'),FCst 0.0);((2,'F'),FCst 2.0);
+    ((2,'G'),FCst 2.0);((2,'H'),RangeOp((2,'B'),(2,'G'),Sum))]
+let calcPct col = ArithOp(FCst 100.0, Mul, ArithOp(Ref(2,col),Div,Ref(2,'H')))
+let pct = [((3,'A'),SCst "PCT");((3,'B'),calcPct 'B');((3,'C'),calcPct 'C');
+    ((3,'D'),calcPct 'D');((3,'E'),calcPct 'E');((3,'F'),calcPct 'F');
+    ((3,'G'),calcPct 'G');((3,'H'),calcPct 'H')]
+let dice = Map.ofList (header @ result @ pct)
+
+
 // Q4.2
 let getF = function
     F f -> f
@@ -167,6 +180,7 @@ let evalRangeOp xs op =
 
 evalRangeOp [F 33.0; F 32.0] Sum
 evalRangeOp [F 33.0; F 32.0] Count
+evalRangeOp [F 23.0; S "Hans"] Count
 
 let evalArithOp v1 v2 op =
     match op with
@@ -177,20 +191,49 @@ let evalArithOp v1 v2 op =
 
 evalArithOp (F 33.0) (F 32.0) Sub
 
+
 // Q4.3
+let cellList ca1 ca2 =
+    match ca1, ca2 with
+    | (r1,c1),(r2,c2) ->
+        Seq.toList (seq { for i in c1 .. c2 do for j in r1 .. r2 -> (j,(char) i)})
+
 let rec evalValue v sheet =
     match v with
     | FCst f -> F f
     | SCst s -> S s
     | Ref ca -> evalCell ca sheet
-    | RangeOp (ca1, ca2, op) -> F (evalRangeOp [(evalCell ca1 sheet);(evalCell ca2 sheet)] op)
-    | ArithOp (v1, op, v2) -> match v1,v2 with
-        | FCst v1, FCst v2 -> F (evalArithOp (F v1) (F v2) op)
-        | Ref v1, Ref v2 -> F (evalArithOp (evalCell v1 sheet) (evalCell v2 sheet) op)
-        | _ -> failwith "cn't use arithmetric operator on input"
+    | RangeOp (ca1, ca2, op) ->
+        let evaluatedCells = List.map (fun cell -> evalCell cell sheet) (cellList ca1 ca2)
+        F (evalRangeOp  evaluatedCells op)
+    | ArithOp (v1, op, v2) -> F (evalArithOp (getAr v1 sheet) (getAr v2 sheet) op)
 and evalCell ca sheet =
     match Map.tryFind ca sheet with
     | None -> S ""
     | Some v -> evalValue v sheet
 
+and getAr v sheet =
+    match v with
+    | FCst v -> F v
+    | Ref v -> evalCell v sheet
+    | ArithOp (v1,op,v2) -> F (evalArithOp (evalValue v1 sheet) (evalValue v2 sheet) op)
+
+evalCell (3,'G') dice
+
 // Q4.4
+let ppBoard sheet =
+
+    // Print headers
+    Map.iter (fun (row,col) v ->
+        if row = 1 then
+            printf "     %c |" col
+        ) sheet
+    
+    printf "\n"
+    // Print second row
+    Map.iter (fun (row,col) v ->
+        if row = 1 then
+            printf "-------+"
+        ) sheet 
+
+ppBoard dice
