@@ -35,7 +35,7 @@ let remove e (PrioritySet ps) =
 let add e (PrioritySet ps) =
     match contains e (PrioritySet ps) with
     | true -> PrioritySet ps
-    | false -> PrioritySet (List.append [e] ps)
+    | false -> PrioritySet (e::ps)
 
 // Q1.4
 let map f (PrioritySet ps) =
@@ -103,13 +103,17 @@ let mySeq3 n =
 
 
 // Question 4
+type Env = Map<string, string list>
 
 type DataSpec =
     | RangeInt of int * int
+    | Pick of string
+    | Label of string * DataSpec
     | ChoiceString of string list
     | StringSeq of string
     | Pair of DataSpec * DataSpec
     | Repeat of int * DataSpec
+
 
 let reg =
     Repeat(3,Pair(StringSeq "a",
@@ -127,10 +131,27 @@ let numGen =
     fun () -> n := !n+1; !n
 
 let rec genValue = function
-    | RangeInt(i1,i2) -> next(i1,i2).ToString()
+    | RangeInt(i1, i2) -> next(i1,i2).ToString()
     | ChoiceString xs -> List.item (next(0, (List.length xs))) xs
     | Repeat (x,e) -> List.fold (fun acc e -> acc + ", " + (genValue e)) "" (Seq.toList (Seq.init x (fun _ -> e)))
     | Pair (e1,e2) -> genValue e1 + " " + genValue e2
-    | StringSeq -> 
+    | StringSeq s -> s + numGen.ToString()
 
-    
+let reg2 = Repeat(3, Pair(Label("articleCode", StringSeq "a"),
+                        Pair(ChoiceString["cheese";"herring";"soft drink"],
+                            RangeInt(1,100))))
+
+let pur2 = Repeat(2, Pair(RangeInt(1,10), Pick "articleCode"))
+
+let addToEnv s v (dEnv:Env) : Env =
+    match Map.tryFind s dEnv with
+    | None -> Map.add s [v] dEnv
+    | Some ev -> Map.add s (ev @ [v]) dEnv
+
+let pickFromEnv s (dEnv:Env) =
+    match Map.tryFind s dEnv with
+    | None -> failwith "does not exist"
+    | Some v ->
+        let itemNumber = next(0,v.Length)
+        List.item itemNumber v
+
