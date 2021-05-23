@@ -27,6 +27,12 @@ let rec size H =
     | EmptyHP -> 0
     | HP (_, l, r) -> 1 + (size l) + (size r)
 
+let rec size H =
+    match H with
+    | EmptyHP -> 0
+    | HP (_, l, r) ->
+        1 + (size l) + (size r)
+        
 let find h =
     match h with
     | HP (i, _, _) -> i
