@@ -52,3 +52,12 @@ sizeMultimap (removeMultimap "Sine" None studReg)
 sizeMultimap (removeMultimap "Sine" (Some "PLUR") studReg)
 sizeMultimap (removeMultimap "Kenneth" (Some "BLOB") studReg)
 sizeMultimap (removeMultimap "Peter" (Some "IFFY") studReg)
+
+
+// Q1.5
+let mapMultimap f (MMap m) =
+    MMap (Map.map (fun key list -> List.map (fun elm -> f key elm) list) m)
+
+// Q1.6
+let foldMultimap (f:'s->'k->'t->'s) s (MMap m:multimap<'k,'t>) =
+    Map.fold (fun acc key list -> List.fold (fun acc' elm -> f acc' key elm) acc list) s m
