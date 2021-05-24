@@ -168,14 +168,43 @@ let ppQuote s = "\"" + s + "\""
 let ppJSONlite json =
     let rec ppValue' indent = function
         | String s -> (ppQuote s)
-        | 
+        | Ref s -> (ppQuote ("ref " + s))
+        | Record xs -> "{" + nl + (ppJSONlite' (indent+1) xs) + (space (indent-1)) + "},"
+        | Label (s,v) -> (s + " -> ") + (ppValue' indent v)
     and ppJSONlite' indent = function
         | Object xs ->
-            nl + "{"
-            + nl + List.fold (fun state elm ->
+            List.fold (fun state elm ->
                 let (key, value) = elm
-                state + " " + (ppQuote key) + " : { " + (ppValue' indent value) + " }" + nl) "" xs
-            + nl + "}"
-    ppJSONlite' 0 json
+                state + (space indent) + (ppQuote key) + " : " + (ppValue' (indent+1) value) + nl) "" xs
+    nl + "{" + nl + (ppJSONlite' 1 json) + "}"
 
-ppJSONlite persons
+printf "%A" (ppJSONlite persons)
+
+// Q4.3
+let buildEnv json =
+    let rec buildEnvValue env = function
+    | String _ -> env
+    | Ref _ -> env
+    | Label (s,v) -> Map.add s v env
+    | Record xs -> buildEnvJSONLite env xs
+    and buildEnvJSONLite env = function
+    | Object xs -> List.fold (fun acc (_,value) -> buildEnvValue acc value) env xs
+    buildEnvJSONLite Map.empty json
+
+// Q4.4
+let expandRef (Object json) =
+    let env = buildEnv (Object json)
+
+    let rec replaceValues list =
+        List.map (fun (k,v) ->
+            let value =
+                match v with
+                | Record xs -> Record (replaceValues xs)
+                | String s -> (String s)
+                | Ref r -> Map.find r env
+                | Label (_,v') -> v'
+            (k,value)
+            ) list
+    replaceValues (Object json)
+
+expandRef persons
