@@ -47,8 +47,8 @@ let trie03 =
     TN(
         'a',
         false,
-        [ TN('n', true, [ TN('d', true, []) ])
-          TN('d', false, [ TN('d', true, []) ])
+        [ TN('n', true, [ TN('d', true, []) ]);
+          TN('d', false, [ TN('d', true, []) ]);
           TN('t', true, []) ]
     )
 
