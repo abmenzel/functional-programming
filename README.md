@@ -1,2 +1,2 @@
-# Functional programming
+# Functional programming 💕
 Course at ITU
