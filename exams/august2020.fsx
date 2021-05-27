@@ -171,7 +171,7 @@ let FseqCache = Seq.cache Fseq
 
 // Fseq and FseqCache have the same type as caching simply means that the value is computed once and the re-used if called again with the same parameters.
 
-let combineFMSeq = Seq.initInfinite (fun i -> combineFM i)
+let combineFMSeq = Seq.initInfinite combineFM
 Seq.take 4 combineFMSeq
 
 
