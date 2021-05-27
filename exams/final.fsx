@@ -190,6 +190,121 @@ fold (fun a c -> a+((string) c)) "" ulist01
 
 // Q 3
 
+// Q 3.1
+
+let rec G (m,n) =
+    match n with
+    | n when n <= 0 -> n + m
+    | _ -> G (2*m,n-1) + m
+
+G(10,10)
+
+// This implementation of G is not tail-recursive, we can make it tail-recursive like below.
+// Here we use an inner recursive function to accumulate the computed values.
+
+let GA (m,n) =
+    let rec G' (m,n) acc =
+        match n with
+        | n when n <= 0 -> acc + n + m
+        | _ -> G' (2*m,n-1) (acc + m)
+    G' (m,n) 0
+
+GA(10,10)
+
+// Q 3.2
+
+// We use a nested loop in order to create 100 sequences from i to 100 each.
+let mySeq = seq {for i in [1 .. 100] do yield! seq {for j in [1 .. 100] do yield (i,j)}}
+Seq.take 4 mySeq
+
+// We use a sequence expression in order to loop over elements from mySeq and apply GA to each of the tuples.
+let gSeq = seq {for i in mySeq do GA i}
+Seq.take 4 gSeq
+
+
+// Q 4
+type stack = int list
+type inst =
+  ADD    
+| SUB
+| PUSH of int
+| LABEL of string
+| IFNZGOTO of string
+| EXIT
+
+let insts01 =
+  [PUSH 10;
+   PUSH 12;
+   ADD;
+   EXIT]
+
+let insts02 =
+  [PUSH 10;
+   LABEL "sub1";
+   PUSH 1;
+   SUB;
+   IFNZGOTO "sub1";
+   EXIT]
+
+// Q 4.1
+// We add support for add, push and exit using the defined template.
+let execInsts insts =
+  let rec exec insts s =
+    match (insts,s) with
+      | (SUB::is,v1::v2::s) -> exec is (v2-v1::s)
+      | (ADD::is,v1::v2::s) -> exec is (v1+v2::s)
+      | ((PUSH number)::is,s) -> exec is (number::s)
+      | (LABEL lab::_,s) -> failwith "LABEL not implemented"
+      | (IFNZGOTO lab::_,s) -> failwith "IFNZGOTO not implemented"
+      | (EXIT::_,res::_) -> res 
+      | _ -> failwith "Missing stack values for instruction"
+  exec insts []
+               
+execInsts insts01
+execInsts insts02
+
+// Q 4.2
+
+type resolvedInst =
+    RADD
+  | RSUB
+  | RPUSH of int
+  | RIFNZGOTO of int
+  | REXIT
+type prog = Map<int,resolvedInst>
+
+type env = Map<string,int>
+
+let lookup l m =
+  match Map.tryFind l m with
+    None -> failwith "Value not in map"
+  | Some v -> v
+
+// We build the environment by matching labels to their index, and returning the map built
+let buildEnv insts =
+  let rec build idx env = function
+  | [] -> env
+  | LABEL lab :: insts -> build idx (Map.add lab idx env) insts
+  | _ :: insts -> build (idx+1) env insts
+  build 0 Map.empty insts
+
+buildEnv insts01
+buildEnv insts02
+
+// We create a resolved map of instructions by removing all labels and replacing references with their respective indexes.
+// The result is a map with no labels.
+let resolveInsts insts env =
+  let rec resolve idx = function
+    [] -> Map.empty
+  | LABEL _ :: insts -> resolve idx insts
+  | ADD :: insts -> Map.add idx RADD (resolve (idx+1) insts)
+  | SUB :: insts -> Map.add idx RSUB (resolve (idx+1) insts)
+  | (PUSH v):: insts -> Map.add idx (RPUSH v) (resolve (idx+1) insts)
+  | IFNZGOTO lab :: insts -> Map.add idx (RIFNZGOTO (lookup lab env)) (resolve (idx+1) insts)
+  | EXIT :: insts -> Map.add idx REXIT (resolve (idx+1) insts)
+  resolve 0 insts
+
+resolveInsts insts02 (buildEnv insts02)
 
 
 // Get back to:
