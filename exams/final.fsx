@@ -114,16 +114,16 @@ let ulist01 = [ { sizeBucket = 4; elems = ['A';'B';'C';'D'] };
 // Furthermore the lists are filled with chars, meaning that it is now no longer a list of generic types.
 // So it is now a list of multiple buckets holding chars.
 
-// We can create another value with the same elements as ulist01, and switch the order of the buckets.
-let ulist02 = [ { sizeBucket = 4; elems = ['A';'B';'C';'D'] };
-                { sizeBucket = 2; elems = ['E';'F'] };
-                { sizeBucket = 6; elems = ['M'; 'N'; 'O'; 'P'; 'Q'; 'R'] };
+// We can create another value with the same elements as ulist01, but with bucket two and bucket 1 combined.
+let ulist02 = [ { sizeBucket = 6; elems = ['A';'B';'C';'D';'E';'F'] };
                 { sizeBucket = 6; elems = ['G';'H'; 'I'; 'J'; 'K'; 'L'] };
+                { sizeBucket = 6; elems = ['M'; 'N'; 'O'; 'P'; 'Q'; 'R'] };
                 { sizeBucket = 4; elems = ['S'; 'T'; 'U'; 'V'] };
                 { sizeBucket = 4; elems = ['W'; 'X'; 'Y'; 'Z'] } ]
 
-// the expression ulist02 = ulist01 returns false, as these values do not store the bucket records in the same order.
-// However, for our data structure we don't care about the order of the buckets. Thus we consider these two store the same elements.
+// the expression ulist02 = ulist01 returns false, as these values do not store equal values of bucket records.
+// However, for our data structure we don't care how elements are grouped together in the buckets, as long as the same elements are represented.
+// Thus we consider ulist01 and ulist02 to store the same elements.
 
 let emptyUL () : UList<'a> = []
 
@@ -178,18 +178,25 @@ let ulist03Wrong = [ { sizeBucket = 2; elems = [1] };
                      { sizeBucket = 0; elems = [] };
                      { sizeBucket = 5; elems = [2;3;4;5;6] } ]
 
+let ulist03Correct = [ { sizeBucket = 2; elems = [1;2] };
+                       { sizeBucket = 4; elems = [2;3;4;5] } ] 
+
+// We start off by assuming the unrolled list meets the rules, therefore we use true as our default state.
 // We check all three rules and only return true if all rules are met.
+
 // The assignment states that ulist01 should return true. However, it has buckets with sizeBucket larger than 4.
 // Thereby, from my interpretation, it violates rule 1: maxSizeBucket = 4, and should return false, not true as stated in the assignment.
-
+// I have create ulist03Correct to show an example of an unrolled list that meets all rules.
 let chkUL (ul:Bucket<'a> list) =
+    let maxSizeBucket = 4
     let sizeMatchElements = List.fold (fun state bucket -> if bucket.sizeBucket <> bucket.elems.Length then false else state) true ul
-    let withinBounds = List.fold (fun state bucket -> if bucket.sizeBucket > 4 then false else state) true ul
+    let withinBounds = List.fold (fun state bucket -> if bucket.sizeBucket > maxSizeBucket then false else state) true ul
     let notEmpty = List.fold (fun state bucket -> if List.isEmpty bucket.elems then false else state) true ul
     (sizeMatchElements && withinBounds && notEmpty)
 
 chkUL ulist03Wrong
 chkUL ulist01
+chkUL ulist03Correct
 
 // We map over each bucket in the unrolled list. For each bucket we map over the list of elements and apply the provided function f.
 let map (f:'a->'b) (ul:Bucket<'a> list) =
@@ -202,6 +209,7 @@ let fold (f:'a->'b->'a) (a:'a) (ul:Bucket<'b> list) : 'a =
     List.fold (fun acc bucket -> List.fold (fun acc' elem -> f acc' elem) acc bucket.elems) a ul
 
 fold (fun a c -> a+((string) c)) "" ulist01
+
 
 // Q 3
 
@@ -320,8 +328,3 @@ let resolveInsts insts env =
   resolve 0 insts
 
 resolveInsts insts02 (buildEnv insts02)
-
-
-// Get back to:
-// q2.1
-// q2.3 chkUL
