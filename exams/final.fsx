@@ -75,9 +75,24 @@ let concat r1 r2 =
 let rope4 = concat rope1 rope2
 
 
-// !!!!
-let prettyprint (r:Rope) = ""
+// We use two helper functions nl (creates a new line) and (space n) creates indentation of n*4 characters.
+// We then proceed to iterate over all nodes using a recursive function buildString. For each recursive call, we increase the indentation.
+let nl = System.Environment.NewLine
+let space n = String.replicate (n*4) " "
 
+let prettyprint (r:Rope) =
+    let rec buildString indent (r':Rope) =
+        match r' with
+        | Leaf (word, length) ->
+            nl + (space indent) + "Leaf(" + word + "," + ((string) length) + ")"
+        | Node (ropeLeft, size, ropeRight) ->
+            nl + (space indent) + "Node(" +
+            (buildString (indent + 1) ropeLeft) + "," +
+            nl + (space (indent + 1)) + ((string) size) + "," +
+            (buildString (indent + 1) ropeRight)
+    printfn "%s" (buildString 0 r)
+
+prettyprint rope1
 
 // Q 2
 
@@ -308,6 +323,5 @@ resolveInsts insts02 (buildEnv insts02)
 
 
 // Get back to:
-// q1.3
 // q2.1
 // q2.3 chkUL
