@@ -111,8 +111,8 @@ let ulist01 = [ { sizeBucket = 4; elems = ['A';'B';'C';'D'] };
 // Q 2.1
 
 // The type of ulist01 is Bucket<char> list, as fsharp's type inference system sees that it follows the rules defined for the Bucket type.
-// Furthermore the lists are filled with chars, meaning that it is now no longer a list of generic types.
-// So it is now a list of multiple buckets holding chars.
+// Furthermore the elems lists consists of chars, meaning that it is now no longer a list of generic types.
+// So it is now a list of multiple records of type Bucket, with an elems list consisting of chars, thus, a list of Bucket<char>
 
 // We can create another value with the same elements as ulist01, but with bucket two and bucket 1 combined.
 let ulist02 = [ { sizeBucket = 6; elems = ['A';'B';'C';'D';'E';'F'] };
